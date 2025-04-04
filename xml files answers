@@ -15,16 +15,25 @@
 <!--START OF YOUR ANSWERS and SQL STATEMENTS-->
 
     <question id="1">
-        <answer></answer>
+        <answer>The Lodger (1898)</answer>
         <sql>
-  
+            SELECT title 
+            FROM imdb.movies 
+            WHERE year = (SELECT MIN(year) FROM imdb.movies);
         </sql>
     </question>
 
+
     <question id="2">
-        <answer></answer>
+        <answer>2</answer>
         <sql>
-       
+            SELECT COUNT(*) 
+            FROM (
+                SELECT movie_id
+                FROM imdb.movies_directors
+                GROUP BY movie_id
+                HAVING COUNT(director_id) > 7
+            ) AS sub;
         </sql>
     </question>
 
