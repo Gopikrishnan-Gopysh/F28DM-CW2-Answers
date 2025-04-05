@@ -375,9 +375,17 @@ LIMIT 1;
     </question>
 
     <question id="24">
-        <answer></answer>
+        <answer>87</answer>
         <sql>
-       
+SELECT COUNT(1) 
+FROM  
+	(
+		SELECT osm_name, COUNT(DISTINCT(osm_id))
+		FROM accident.network
+		WHERE osm_name ILIKE '%avenue%'
+		GROUP BY osm_name
+		HAVING COUNT(DISTINCT(osm_id)) > 1
+	)       
         </sql>
     </question>
 
