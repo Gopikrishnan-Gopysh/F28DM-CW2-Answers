@@ -27,69 +27,138 @@
     <question id="2">
         <answer>2</answer>
         <sql>
-            SELECT COUNT(*) 
-            FROM (
-                SELECT movie_id
-                FROM imdb.movies_directors
-                GROUP BY movie_id
-                HAVING COUNT(director_id) > 7
-            ) AS sub;
+SELECT COUNT(*) 
+FROM (
+    SELECT movieid
+    FROM imdb.movies2directors
+    GROUP BY movieid
+    HAVING COUNT(directorid) > 7
+) AS sub;
         </sql>
     </question>
 
     <question id="3">
-        <answer></answer>
+        <answer>1940</answer>
         <sql>
-       
+       SELECT m.title, m.year, COUNT(md.directorid) AS num_directors
+FROM imdb.movies2directors md
+JOIN imdb.movies m ON md.movieid = m.movieid
+GROUP BY m.movieid, m.title, m.year
+ORDER BY num_directors DESC
+LIMIT 1;
         </sql>
     </question>
 
     <question id="4">
-        <answer></answer>
+        <answer>2500324</answer>
         <sql>
-       
+SELECT m2a2.actorid, COUNT(*) AS coactor_count
+FROM imdb.movies2actors m2a1
+JOIN imdb.movies2actors m2a2 ON m2a1.movieid = m2a2.movieid
+WHERE m2a1.actorid = (
+    SELECT actorid 
+    FROM imdb.actors 
+    WHERE name = 'Hanks, Tom'
+    LIMIT 1
+)
+AND m2a2.actorid != m2a1.actorid
+GROUP BY m2a2.actorid
+ORDER BY coactor_count DESC
+LIMIT 1;
+
+)
+AND coactor.actorid != tom.actorid
+GROUP BY coactor.actorid
+ORDER BY coactor_count DESC
+LIMIT 1;
         </sql>
     </question>
 
     <question id="5">
-        <answer></answer>
+        <answer>3</answer>
         <sql>
-       
+       SELECT COUNT(*) 
+FROM (
+    SELECT a1.actorid AS actor1, a2.actorid AS actor2, COUNT(*) AS shared_films
+    FROM imdb.movies2actors a1
+    JOIN imdb.movies2actors a2 
+        ON a1.movieid = a2.movieid AND a1.actorid < a2.actorid
+    GROUP BY a1.actorid, a2.actorid
+    HAVING COUNT(*) > 10
+) AS actor_pairs;
         </sql>
     </question>
 
     <question id="6">
-        <answer></answer>
+        <answer>1930</answer>
         <sql>
-       
+       SELECT (m.year / 10) * 10 AS decade,
+       AVG(CAST(r.rank AS FLOAT)) AS average_rating
+FROM imdb.movies AS m
+JOIN imdb.ratings AS r ON m.movieid = r.movieid
+GROUP BY decade
+ORDER BY average_rating DESC
+LIMIT 1;
         </sql>
     </question>
 
     <question id="7">
-        <answer></answer>
+        <answer>14</answer>
         <sql>
-       
+       SELECT COUNT(DISTINCT d.movieid) AS movies_without_genre
+FROM imdb.movies AS m
+JOIN imdb.movies2directors AS d ON m.movieid = d.movieid
+WHERE d.genre IS NULL;
         </sql>
     </question>
 
     <question id="8">
-        <answer></answer>
+        <answer>0</answer>
         <sql>
-       
+       SELECT COUNT(DISTINCT d.movieid) AS movie_count
+FROM imdb.movies2directors d
+JOIN imdb.movies2writers w 
+    ON d.movieid = w.movieid AND d.directorid = w.writerid
+JOIN imdb.actors a 
+    ON d.directorid = a.actorid
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM imdb.movies2actors act
+    WHERE act.movieid = d.movieid AND act.actorid = d.directorid
+);
         </sql>
     </question>
 
     <question id="9">
-        <answer></answer>
+        <answer>54501</answer>
         <sql>
-       
+SELECT d.directorid, COUNT(DISTINCT r.movieid) AS long_movie_count
+FROM imdb.runningtimes AS r
+JOIN imdb.movies2directors AS d ON r.movieid = d.movieid
+WHERE r.time1 > 160
+GROUP BY d.directorid
+ORDER BY long_movie_count DESC
+LIMIT 1;
         </sql>
     </question>
 
     <question id="10">
-        <answer></answer>
+        <answer>1694741</answer>
         <sql>
-       
+       SELECT actor.actorid, actor.name, COUNT(DISTINCT act.movieid) AS movie_count
+FROM imdb.movies2actors AS act
+JOIN imdb.movies AS m ON act.movieid = m.movieid
+JOIN imdb.actors AS actor ON act.actorid = actor.actorid
+WHERE m.year < 2015
+  AND act.actorid IN (
+      SELECT DISTINCT s.actorid
+      FROM imdb.movies2actors AS s
+      JOIN imdb.movies2directors AS d ON s.movieid = d.movieid
+      JOIN imdb.directors AS dir ON d.directorid = dir.directorid
+      WHERE dir.name = 'Spielberg, Steven'
+  )
+GROUP BY actor.actorid, actor.name
+HAVING COUNT(DISTINCT act.movieid) > 43;
         </sql>
     </question>
 
