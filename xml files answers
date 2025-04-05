@@ -163,30 +163,79 @@ HAVING COUNT(DISTINCT act.movieid) > 43;
     </question>
 
     <question id="11">
-        <answer></answer>
+        <answer>74</answer>
         <sql>
-       
+       SELECT COUNT(*)
+FROM scenicornot.locations AS loc
+WHERE ST_DWithin(
+    loc.geom_bng,
+    ST_SetSRID(ST_MakePoint(530000, 180000), 27700),
+    5000
+);
         </sql>
     </question>
 
     <question id="12">
-        <answer></answer>
+        <answer>616</answer>
         <sql>
-       
+       SELECT h.cell_id, COUNT(*) AS location_count
+FROM scenicornot.hexgrid10km AS h
+JOIN scenicornot.locations AS l 
+  ON ST_Contains(h.geom, l.geom_bng)
+GROUP BY h.cell_id
+HAVING COUNT(*) > 2
+ORDER BY AVG(l.average) DESC
+LIMIT 1;
         </sql>
     </question>
 
     <question id="13">
-        <answer></answer>
+        <answer>2222</answer>
         <sql>
-       
+       SELECT h.cell_id, COUNT(l.fid) AS num_votes
+FROM scenicornot.hexgrid10km AS h
+JOIN scenicornot.locations AS l 
+  ON ST_Contains(h.geom, l.geom_bng)
+CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(l.votes, ',')) AS vote
+GROUP BY h.cell_id
+ORDER BY num_votes DESC
+LIMIT 1;
         </sql>
     </question>
 
     <question id="14">
-        <answer></answer>
+        <answer>1688,1618</answer>
         <sql>
-       
+       WITH hex_avg AS (
+    SELECT h.cell_id, AVG(l.average) AS avg_scenic_score
+    FROM scenicornot.hexgrid10km AS h
+    JOIN scenicornot.locations AS l ON ST_Contains(h.geom, l.geom_bng)
+    GROUP BY h.cell_id
+),
+
+neighbor_pairs AS (
+    SELECT 
+        h1.cell_id AS cell_id,
+        h2.cell_id AS neighbor_cell_id
+    FROM scenicornot.hexgrid10km AS h1
+    JOIN scenicornot.hexgrid10km AS h2 
+      ON ST_Touches(h1.geom, h2.geom)
+),
+
+score_differences AS (
+    SELECT 
+        n.cell_id,
+        n.neighbor_cell_id,
+        ABS(a1.avg_scenic_score - a2.avg_scenic_score) AS score_difference
+    FROM neighbor_pairs AS n
+    JOIN hex_avg AS a1 ON n.cell_id = a1.cell_id
+    JOIN hex_avg AS a2 ON n.neighbor_cell_id = a2.cell_id
+)
+
+SELECT cell_id, neighbor_cell_id
+FROM score_differences
+ORDER BY score_difference DESC
+LIMIT 1;
         </sql>
     </question>
 
@@ -198,59 +247,117 @@ HAVING COUNT(DISTINCT act.movieid) > 43;
     </question>
 
     <question id="16">
-        <answer></answer>
+        <answer>159</answer>
         <sql>
-       
+       SELECT COUNT(DISTINCT h.cell_id) AS affected_cells
+FROM scenicornot.hexgrid10km AS h
+JOIN quakes.scotquakes AS q
+  ON ST_DWithin(
+       ST_Transform(h.geom, 27700),
+       ST_Transform(q.geom, 27700),
+       100
+     );
         </sql>
     </question>
 
     <question id="17">
-        <answer></answer>
+        <answer>33</answer>
         <sql>
-       
+WITH quake_clusters AS (
+    SELECT 
+        ST_ClusterDBSCAN(geom, eps := 15000, minpoints := 5) OVER () AS cluster_id
+    FROM quakes.scotquakes
+)
+
+SELECT COUNT(DISTINCT cluster_id) AS num_clusters
+FROM quake_clusters
+WHERE cluster_id IS NOT NULL AND cluster_id != -1;
         </sql>
     </question>
 
     <question id="18">
-        <answer></answer>
+        <answer>1</answer>
         <sql>
-       
+       WITH trajectory_clusters AS (
+    SELECT 
+        ST_ClusterDBSCAN(ST_Transform(geom, 27700), eps := 200, minpoints := 10) OVER () AS cluster_id
+    FROM trajectory.tracking
+)
+
+SELECT COUNT(DISTINCT cluster_id) AS num_clusters
+FROM trajectory_clusters
+WHERE cluster_id IS NOT NULL AND cluster_id != -1;
         </sql>
     </question>
 
     <question id="19">
-        <answer></answer>
+        <answer>p1</answer>
         <sql>
-       
+SELECT 
+    t.userid, 
+    COUNT(t.geom) AS point_count
+FROM trajectory.tracking AS t
+GROUP BY t.userid
+ORDER BY point_count DESC
+LIMIT 1;
         </sql>
     </question>
 
     <question id="20">
-        <answer></answer>
+        <answer>p1</answer>
         <sql>
-       
+       SELECT 
+    t.userid, 
+    COUNT(t.geom) AS point_count
+FROM trajectory.tracking AS t
+GROUP BY t.userid
+ORDER BY point_count DESC
+LIMIT 1;
         </sql>
     </question>
 
     <question id="21">
-        <answer></answer>
+        <answer>9</answer>
         <sql>
-       
+       SELECT 
+    t.userid,
+    COUNT(DISTINCT (t.routeid, t.routeleg)) AS unique_legs
+FROM trajectory.tracking AS t
+GROUP BY t.userid
+ORDER BY unique_legs DESC
+LIMIT 1;
         </sql>
     </question>
 
     <question id="22">
-        <answer></answer>
+        <answer>08</answer>
         <sql>
-       
+       WITH monthly_photos AS (
+    SELECT DATE_TRUNC('month', f.date_taken) AS month_start
+    FROM flickr.flickr_edin AS f
+)
+
+SELECT month_start, COUNT(*) AS photo_count
+FROM monthly_photos
+GROUP BY month_start
+ORDER BY photo_count DESC
+LIMIT 1;
         </sql>
     </question>
 
 
     <question id="23">
-        <answer></answer>
+        <answer>"19473027@N00"</answer>
         <sql>
-       
+       SELECT 
+    fe.userid, 
+    COUNT(DISTINCT g100.id) AS location_visits
+FROM flickr.flickr_edin AS fe
+INNER JOIN flickr.grid100m AS g100
+    ON ST_Intersects(fe.geom, g100.geom)
+GROUP BY fe.userid
+ORDER BY location_visits DESC
+LIMIT 1;
         </sql>
     </question>
 
