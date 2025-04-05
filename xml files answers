@@ -16,54 +16,54 @@
 
     <question id="1">
         <answer>The Lodger (1898)</answer>
-        <sql>
+       <sql><![CDATA[  
             SELECT title
             FROM imdb.movies
             WHERE year = (SELECT MIN(year) FROM imdb.movies);
-        </sql>
+         ]]></sql>
     </question>
 
     <question id="2">
         <answer>2</answer>
         <sql><![CDATA[    
-SELECT COUNT(*) 
-FROM (
-    SELECT movieid
-    FROM imdb.movies2directors
-    GROUP BY movieid
-    HAVING COUNT(directorid) > 7
-) AS sub;
+            SELECT COUNT(*) 
+            FROM (
+                SELECT movieid
+                FROM imdb.movies2directors
+                GROUP BY movieid
+                HAVING COUNT(directorid) > 7
+            ) AS sub;
         ]]></sql>
     </question>
 
     <question id="3">
         <answer>1940</answer>
-        <sql>
+       <sql><![CDATA[   
             SELECT m.title, m.year, COUNT(md.directorid) AS num_directors
             FROM imdb.movies2directors md
             JOIN imdb.movies m ON md.movieid = m.movieid
             GROUP BY m.movieid, m.title, m.year
             ORDER BY num_directors DESC
             LIMIT 1;
-        ]]></sql>
+         ]]></sql>
     </question>
 
     <question id="4">
         <answer>2500324</answer>
         <sql><![CDATA[
-SELECT m2a2.actorid, COUNT(*) AS coactor_count
-FROM imdb.movies2actors m2a1
-JOIN imdb.movies2actors m2a2 ON m2a1.movieid = m2a2.movieid
-WHERE m2a1.actorid = (
-    SELECT actorid
-    FROM imdb.actors
-    WHERE name = 'Hanks, Tom'
-    LIMIT 1
-)
-AND m2a2.actorid != m2a1.actorid
-GROUP BY m2a2.actorid
-ORDER BY coactor_count DESC
-LIMIT 1;
+            SELECT m2a2.actorid, COUNT(*) AS coactor_count
+            FROM imdb.movies2actors m2a1
+            JOIN imdb.movies2actors m2a2 ON m2a1.movieid = m2a2.movieid
+            WHERE m2a1.actorid = (
+                SELECT actorid
+                FROM imdb.actors
+                WHERE name = 'Hanks, Tom'
+                LIMIT 1
+            )
+            AND m2a2.actorid != m2a1.actorid
+            GROUP BY m2a2.actorid
+            ORDER BY coactor_count DESC
+            LIMIT 1;
         ]]></sql>
     </question>
 
@@ -125,13 +125,16 @@ LIMIT 1;
     <question id="9">
         <answer>54501</answer>
         <sql><![CDATA[
-SELECT d.directorid, COUNT(DISTINCT r.movieid) AS long_movie_count
-FROM imdb.runningtimes AS r
-JOIN imdb.movies2directors AS d ON r.movieid = d.movieid
-WHERE r.time1 > 160
-GROUP BY d.directorid
-ORDER BY long_movie_count DESC
-LIMIT 1;
+            SELECT directorid, COUNT(DISTINCT movieid) AS long_movie_count
+            FROM imdb.movies2directors
+            WHERE movieid IN (
+                SELECT movieid
+                FROM imdb.runningtimes
+                WHERE time1 > 160
+            )
+            GROUP BY directorid
+            ORDER BY long_movie_count DESC
+            LIMIT 1;
         ]]></sql>
     </question>
 
@@ -382,7 +385,7 @@ LIMIT 1;
     </question>
 
     <question id="25">
-        <answer></answer>
+        <answer>b</answer>
         <sql><![CDATA[
             SELECT 
                 rt.route_label,
