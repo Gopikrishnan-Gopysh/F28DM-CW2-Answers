@@ -26,7 +26,7 @@
 
     <question id="2">
         <answer>2</answer>
-        <sql>
+        <sql><![CDATA[    
 SELECT COUNT(*) 
 FROM (
     SELECT movieid
@@ -46,12 +46,12 @@ JOIN imdb.movies m ON md.movieid = m.movieid
 GROUP BY m.movieid, m.title, m.year
 ORDER BY num_directors DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="4">
         <answer>2500324</answer>
-        <sql>
+        <sql><![CDATA[
 SELECT m2a2.actorid, COUNT(*) AS coactor_count
 FROM imdb.movies2actors m2a1
 JOIN imdb.movies2actors m2a2 ON m2a1.movieid = m2a2.movieid
@@ -71,12 +71,12 @@ AND coactor.actorid != tom.actorid
 GROUP BY coactor.actorid
 ORDER BY coactor_count DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="5">
         <answer>3</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT COUNT(*) 
 FROM (
     SELECT a1.actorid AS actor1, a2.actorid AS actor2, COUNT(*) AS shared_films
@@ -86,12 +86,12 @@ FROM (
     GROUP BY a1.actorid, a2.actorid
     HAVING COUNT(*) > 10
 ) AS actor_pairs;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="6">
         <answer>1930</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT (m.year / 10) * 10 AS decade,
        AVG(CAST(r.rank AS FLOAT)) AS average_rating
 FROM imdb.movies AS m
@@ -99,22 +99,22 @@ JOIN imdb.ratings AS r ON m.movieid = r.movieid
 GROUP BY decade
 ORDER BY average_rating DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="7">
         <answer>14</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT COUNT(DISTINCT d.movieid) AS movies_without_genre
 FROM imdb.movies AS m
 JOIN imdb.movies2directors AS d ON m.movieid = d.movieid
 WHERE d.genre IS NULL;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="8">
         <answer>0</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT COUNT(DISTINCT d.movieid) AS movie_count
 FROM imdb.movies2directors d
 JOIN imdb.movies2writers w 
@@ -126,12 +126,12 @@ WHERE NOT EXISTS (
     FROM imdb.movies2actors act
     WHERE act.movieid = d.movieid AND act.actorid = d.directorid
 );
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="9">
         <answer>54501</answer>
-        <sql>
+        <sql><![CDATA[
 SELECT d.directorid, COUNT(DISTINCT r.movieid) AS long_movie_count
 FROM imdb.runningtimes AS r
 JOIN imdb.movies2directors AS d ON r.movieid = d.movieid
@@ -139,12 +139,12 @@ WHERE r.time1 > 160
 GROUP BY d.directorid
 ORDER BY long_movie_count DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="10">
         <answer>1694741</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT actor.actorid, actor.name, COUNT(DISTINCT act.movieid) AS movie_count
 FROM imdb.movies2actors AS act
 JOIN imdb.movies AS m ON act.movieid = m.movieid
@@ -159,12 +159,12 @@ WHERE m.year < 2015
   )
 GROUP BY actor.actorid, actor.name
 HAVING COUNT(DISTINCT act.movieid) > 43;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="11">
         <answer>74</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT COUNT(*)
 FROM scenicornot.locations AS loc
 WHERE ST_DWithin(
@@ -172,12 +172,12 @@ WHERE ST_DWithin(
     ST_SetSRID(ST_MakePoint(530000, 180000), 27700),
     5000
 );
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="12">
         <answer>616</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT h.cell_id, COUNT(*) AS location_count
 FROM scenicornot.hexgrid10km AS h
 JOIN scenicornot.locations AS l 
@@ -186,12 +186,12 @@ GROUP BY h.cell_id
 HAVING COUNT(*) > 2
 ORDER BY AVG(l.average) DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="13">
         <answer>2222</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT h.cell_id, COUNT(l.fid) AS num_votes
 FROM scenicornot.hexgrid10km AS h
 JOIN scenicornot.locations AS l 
@@ -200,12 +200,12 @@ CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(l.votes, ',')) AS vote
 GROUP BY h.cell_id
 ORDER BY num_votes DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="14">
         <answer>1688,1618</answer>
-        <sql>
+        <sql><![CDATA[
        WITH hex_avg AS (
     SELECT h.cell_id, AVG(l.average) AS avg_scenic_score
     FROM scenicornot.hexgrid10km AS h
@@ -236,12 +236,12 @@ SELECT cell_id, neighbor_cell_id
 FROM score_differences
 ORDER BY score_difference DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="15">
         <answer>2024-01-28 00:00:00</answer>
-        <sql>
+        <sql><![CDATA[
        WITH quake_periods AS (
     SELECT 
         DATE_TRUNC('day', TIMESTAMP '2010-01-01 00:00:00') + 
@@ -256,12 +256,12 @@ SELECT period_start AS start_time, quake_count
 FROM quake_periods
 ORDER BY quake_count DESC
 LIMIT 1;      
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="16">
         <answer>159</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT COUNT(DISTINCT h.cell_id) AS affected_cells
 FROM scenicornot.hexgrid10km AS h
 JOIN quakes.scotquakes AS q
@@ -270,12 +270,12 @@ JOIN quakes.scotquakes AS q
        ST_Transform(q.geom, 27700),
        100
      );
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="17">
         <answer>33</answer>
-        <sql>
+        <sql><![CDATA[
 WITH quake_clusters AS (
     SELECT 
         ST_ClusterDBSCAN(geom, eps := 15000, minpoints := 5) OVER () AS cluster_id
@@ -285,12 +285,12 @@ WITH quake_clusters AS (
 SELECT COUNT(DISTINCT cluster_id) AS num_clusters
 FROM quake_clusters
 WHERE cluster_id IS NOT NULL AND cluster_id != -1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="18">
         <answer>1</answer>
-        <sql>
+        <sql><![CDATA[
        WITH trajectory_clusters AS (
     SELECT 
         ST_ClusterDBSCAN(ST_Transform(geom, 27700), eps := 200, minpoints := 10) OVER () AS cluster_id
@@ -300,12 +300,12 @@ WHERE cluster_id IS NOT NULL AND cluster_id != -1;
 SELECT COUNT(DISTINCT cluster_id) AS num_clusters
 FROM trajectory_clusters
 WHERE cluster_id IS NOT NULL AND cluster_id != -1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="19">
         <answer>p1</answer>
-        <sql>
+        <sql><![CDATA[
 SELECT 
     t.userid, 
     COUNT(t.geom) AS point_count
@@ -313,12 +313,12 @@ FROM trajectory.tracking AS t
 GROUP BY t.userid
 ORDER BY point_count DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="20">
         <answer>p1</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT 
     t.userid, 
     COUNT(t.geom) AS point_count
@@ -326,12 +326,12 @@ FROM trajectory.tracking AS t
 GROUP BY t.userid
 ORDER BY point_count DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="21">
         <answer>9</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT 
     t.userid,
     COUNT(DISTINCT (t.routeid, t.routeleg)) AS unique_legs
@@ -339,12 +339,12 @@ FROM trajectory.tracking AS t
 GROUP BY t.userid
 ORDER BY unique_legs DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="22">
         <answer>08</answer>
-        <sql>
+        <sql><![CDATA[
        WITH monthly_photos AS (
     SELECT DATE_TRUNC('month', f.date_taken) AS month_start
     FROM flickr.flickr_edin AS f
@@ -355,13 +355,13 @@ FROM monthly_photos
 GROUP BY month_start
 ORDER BY photo_count DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
 
     <question id="23">
         <answer>"19473027@N00"</answer>
-        <sql>
+        <sql><![CDATA[
        SELECT 
     fe.userid, 
     COUNT(DISTINCT g100.id) AS location_visits
@@ -371,12 +371,12 @@ INNER JOIN flickr.grid100m AS g100
 GROUP BY fe.userid
 ORDER BY location_visits DESC
 LIMIT 1;
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="24">
         <answer>87</answer>
-        <sql>
+        <sql><![CDATA[
 SELECT COUNT(1) 
 FROM  
 	(
@@ -386,14 +386,14 @@ FROM
 		GROUP BY osm_name
 		HAVING COUNT(DISTINCT(osm_id)) > 1
 	)       
-        </sql>
+        ]]></sql>
     </question>
 
     <question id="25">
         <answer></answer>
-        <sql>
+        <sql><![CDATA[
        
-        </sql>
+        ]]></sql>
     </question>
 
 
