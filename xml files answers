@@ -240,9 +240,22 @@ LIMIT 1;
     </question>
 
     <question id="15">
-        <answer></answer>
+        <answer>2024-01-28 00:00:00</answer>
         <sql>
-       
+       WITH quake_periods AS (
+    SELECT 
+        DATE_TRUNC('day', TIMESTAMP '2010-01-01 00:00:00') + 
+        INTERVAL '48 hours' * FLOOR(EXTRACT(EPOCH FROM (q.datetime - TIMESTAMP '2010-01-01 00:00:00')) / (48 * 3600)) 
+        AS period_start,
+        COUNT(*) AS quake_count
+    FROM quakes.scotquakes AS q
+    GROUP BY period_start
+)
+
+SELECT period_start AS start_time, quake_count
+FROM quake_periods
+ORDER BY quake_count DESC
+LIMIT 1;      
         </sql>
     </question>
 
