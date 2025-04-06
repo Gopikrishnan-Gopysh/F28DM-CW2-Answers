@@ -284,18 +284,12 @@
         ]]></sql>
     </question>
 
-    <question id="18">
+   <question id="18">
         <answer>1</answer>
         <sql><![CDATA[
-            WITH trajectory_clusters AS (
-                SELECT 
-                    ST_ClusterDBSCAN(ST_Transform(geom, 27700), eps := 200, minpoints := 10) OVER () AS cluster_id
-                FROM trajectory.tracking
-            )
-
-            SELECT COUNT(DISTINCT cluster_id) AS num_clusters
-            FROM trajectory_clusters
-            WHERE cluster_id IS NOT NULL AND cluster_id != -1;
+            SELECT AVG(spd) 
+            FROM trajectory.tracking 
+            WHERE userid='p3'
         ]]></sql>
     </question>
 
@@ -315,12 +309,10 @@
     <question id="20">
         <answer>p1</answer>
         <sql><![CDATA[
-            SELECT 
-                t.userid, 
-                COUNT(t.geom) AS point_count
-            FROM trajectory.tracking AS t
-            GROUP BY t.userid
-            ORDER BY point_count DESC
+            SELECT userid, SUM(routeleg) AS nos 
+            FROM trajectory.tracking 
+            GROUP BY userid 
+            ORDER BY nos DESC 
             LIMIT 1;
         ]]></sql>
     </question>
